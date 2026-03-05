@@ -319,7 +319,7 @@
       if (followups.length > 0) {
         const style = summaryText ? 'style="display:none; opacity:0; transition: opacity 0.5s ease; margin-top: 15px;"' : '';
         const chips = followups.map(q =>
-          `<button class="followup-chip" onclick="askFollowup(${JSON.stringify(q)})">
+          `<button class="followup-chip" onclick='askFollowup(${JSON.stringify(q).replace(/'/g, "&#39;")})'>
          <i data-lucide="corner-down-right" style="width:12px;height:12px;"></i>
          ${esc(q)}
        </button>`
@@ -489,7 +489,7 @@
         const div = document.createElement("div");
         div.className = "msg";
         const chips = (d.suggestions || []).map(s =>
-          `<button class="followup-chip" onclick="askFollowup(${JSON.stringify(s)})">
+          `<button class="followup-chip" onclick='askFollowup(${JSON.stringify(s).replace(/'/g, "&#39;")})'>
          <i data-lucide="corner-down-right" style="width:12px;height:12px;"></i>${esc(s)}
        </button>`
         ).join("");
