@@ -416,18 +416,86 @@
       doAsk();
     }
 
-    /* ── Typewriter ─────────────────────────────────────────────────── */
+    /* ── Typewriter (ChatGPT Style) ─────────────────────────────────── */
     function typewriter(text, el, onDone) {
       const html = marked.parse(text);
-      // Use a temporary div to get plaintext length for char-by-char is hard on HTML.
-      // Instead, render instantly but animate opacity per paragraph.
-      el.innerHTML = html;
-      el.style.opacity = "0";
-      el.style.transition = "opacity .4s ease";
-      setTimeout(() => {
-        el.style.opacity = "1";
-        if (onDone) onDone();
-      }, 80);
+      let i = 0;
+      el.innerHTML = "";
+      let currentHTML = "";
+
+      // Add a CSS class for the blinking cursor dynamically if not present
+      if (!document.getElementById("cursor-style")) {
+        const style = document.createElement("style");
+        style.id = "cursor-style";
+        style.innerHTML = `
+          .ai-cursor {
+            display: inline-block;
+            width: 6px;
+            height: 14px;
+            background-color: var(--tx-2);
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 4px;
+            margin-bottom: 2px;
+          }
+          @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        `;
+        document.head.appendChild(style);
+      }
+
+      function typeNext() {
+        if (i < html.length) {
+          let isTag = false;
+          // Process HTML tags instantly
+          if (html[i] === '<') {
+            let tag = "";
+            while (i < html.length && html[i] !== '>') {
+              tag += html[i];
+              i++;
+            }
+            tag += '>';
+            currentHTML += tag;
+            isTag = true;
+          } 
+          // Process HTML entities (&amp;, etc) instantly
+          else if (html[i] === '&') {
+            let ent = "";
+            while (i < html.length && html[i] !== ';') {
+              ent += html[i];
+              i++;
+            }
+            ent += ';';
+            currentHTML += ent;
+            isTag = true;
+          } 
+          // Process normal text (1-2 chars at a time)
+          else {
+            currentHTML += html[i];
+            i++;
+            // Randomly type 2 characters at once for a more natural matrix effect
+            if (i < html.length && html[i] !== '<' && html[i] !== '&' && Math.random() > 0.3) {
+              currentHTML += html[i];
+              i++;
+            }
+          }
+
+          // Render what we have so far + cursor
+          el.innerHTML = currentHTML + '<span class="ai-cursor"></span>';
+
+          if (isTag) {
+            typeNext(); // No delay for HTML tags parsing
+          } else {
+            scrollBottom(); // Auto-scroll as it types
+            setTimeout(typeNext, 8 + Math.random() * 15); // Fast, variable typing speed (8ms - 23ms)
+          }
+        } else {
+          // Finished typing, remove cursor
+          el.innerHTML = currentHTML;
+          if (onDone) onDone();
+        }
+      }
+
+      typeNext();
     }
 
     /* ── Fetch helper ───────────────────────────────────────────────── */
