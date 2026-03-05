@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elliot — Governed Data Platform</title>
+  <meta name="description"
+    content="Role-aware, policy-enforced financial data platform powered by Databricks and AI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css?v=10" />
+  <script defer src="https://unpkg.com/lucide@latest"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+
+<body>
+
+  <!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <svg viewBox="0 0 160 40" width="130" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M 26 6 H 6 C 3.5 6 2 7.5 2 10 V 30 C 2 32.5 3.5 34 6 34 H 26 V 26 H 13 C 11.5 26 11 25.5 11 24 V 16 C 11 14.5 11.5 14 13 14 H 26 V 6 Z"
+          fill="#111827" />
+        <path d="M 12 14.5 V 25.5 L 22.5 20 Z" fill="#ff6600" />
+        <text x="31" y="34" font-family="'Inter',sans-serif" font-weight="900" font-size="37" fill="#111827"
+          letter-spacing="0.5">LLIOT</text>
+      </svg>
+    </div>
+
+    <nav class="nav">
+      <!-- Reports -->
+      <div class="nav-group">
+        <span class="nav-heading">Reports</span>
+        <button class="nav-btn" data-endpoint="/api/yearly" id="btn-yearly">
+          <i data-lucide="calendar-days" class="nav-icon"></i>Yearly Revenue
+        </button>
+        <button class="nav-btn" data-endpoint="/api/quarterly" id="btn-quarterly">
+          <i data-lucide="grid-3x3" class="nav-icon"></i>Quarterly Revenue
+        </button>
+        <button class="nav-btn" data-endpoint="/api/summary" id="btn-summary">
+          <i data-lucide="bar-chart-2" class="nav-icon"></i>Platform Summary
+        </button>
+      </div>
+
+      <!-- Rankings -->
+      <div class="nav-group">
+        <span class="nav-heading">Rankings</span>
+        <button class="nav-btn" data-endpoint="/api/top-profit" id="btn-profit">
+          <i data-lucide="trending-up" class="nav-icon"></i>Top 10 by Profit
+        </button>
+        <button class="nav-btn" data-endpoint="/api/top-revenue" id="btn-revenue">
+          <i data-lucide="dollar-sign" class="nav-icon"></i>Top 10 by Revenue
+        </button>
+        <button class="nav-btn" data-endpoint="/api/top-cost" id="btn-cost">
+          <i data-lucide="trending-down" class="nav-icon"></i>Top 10 by Cost
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="nav-group">
+        <span class="nav-heading">Filter by Period</span>
+        <div class="filter-field">
+          <input type="number" id="yearInput" class="filter-input" placeholder="Year e.g. 2024" min="2020" max="2035" />
+          <button class="filter-go" id="btn-year">Go</button>
+        </div>
+        <div class="filter-field">
+          <select id="quarterInput" class="filter-input">
+            <option value="">Quarter...</option>
+            <option value="1">Q1 — Jan–Mar</option>
+            <option value="2">Q2 — Apr–Jun</option>
+            <option value="3">Q3 — Jul–Sep</option>
+            <option value="4">Q4 — Oct–Dec</option>
+          </select>
+          <button class="filter-go" id="btn-quarter">Go</button>
+        </div>
+      </div>
+
+      <!-- Company -->
+      <div class="nav-group">
+        <span class="nav-heading">Company</span>
+        <div class="filter-field">
+          <input type="text" id="companyInput" class="filter-input" placeholder="ID e.g. C001" maxlength="6" />
+          <button class="filter-go" id="btn-company">Year</button>
+        </div>
+        <div class="filter-field">
+          <input type="text" id="companyQInput" class="filter-input" placeholder="ID e.g. C001" maxlength="6" />
+          <button class="filter-go" id="btn-company-q">Qtr</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- User Selector -->
+    <div class="user-selector-wrap">
+      <div class="user-label">Active User</div>
+      <select id="userSelector" class="user-select">
+        <option value="admin|null|Ganesh">Ganesh — Admin</option>
+        <option value="manager|null|Priya">Priya — Manager</option>
+        <option value="finance_user|C001|Rahul">Rahul — Finance (C001)</option>
+        <option value="finance_user|C002|Anita">Anita — Finance (C002)</option>
+        <option value="auditor|null|Vikram">Vikram — Auditor</option>
+        <option value="viewer|null|Sara">Sara — Viewer</option>
+      </select>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="status-row">
+        <span class="status-dot"></span>
+        <span class="status-label">Databricks Connected</span>
+      </div>
+      <span class="footer-sub">Secure Views · Audit Logged</span>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════ MAIN ═══════════════════════ -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">Governed Data Platform</h1>
+        <p class="page-sub">Role-aware · Policy-enforced · AI-powered</p>
+      </div>
+      <div class="topbar-right" id="topbarBadges">
+        <span id="activeBadge" class="badge badge-role"></span>
+        <span class="badge badge-slate">Stage 4</span>
+      </div>
+    </header>
+
+    <!-- Chat area -->
+    <div class="chat-area">
+      <div class="chat-messages" id="chatMessages">
+        <!-- Empty state -->
+        <div class="empty-state" id="emptyState">
+          <i data-lucide="sparkles" style="width:36px;height:36px;color:#cbd5e1;" class="empty-icon"></i>
+          <div>
+            <div class="empty-title">Ask anything about your data</div>
+            <div class="empty-sub">Type a question below or pick a report from the sidebar. The AI will analyse and
+              explain your results.</div>
+          </div>
+          <div class="empty-badges">
+            <span class="empty-badge"><i data-lucide="shield-check"
+                style="width:11px;height:11px;vertical-align:middle;margin-right:3px;"></i>5-Layer SQL Firewall</span>
+            <span class="empty-badge"><i data-lucide="file-text"
+                style="width:11px;height:11px;vertical-align:middle;margin-right:3px;"></i>Full Audit Trail</span>
+            <span class="empty-badge"><i data-lucide="lock"
+                style="width:11px;height:11px;vertical-align:middle;margin-right:3px;"></i>Row-Level Security</span>
+          </div>
+        </div>
+      </div><!-- end chat-messages -->
+
+      <!-- Input bar (pinned to bottom) -->
+      <div class="input-bar">
+        <!-- 3 dynamic suggestion chips -->
+        <div class="input-suggestions" id="inputSuggestions">
+          <button class="sug-chip" data-q="Show me total profit for Elliot Systems">Elliot Systems Profit</button>
+          <button class="sug-chip" data-q="Which company had the highest total revenue?">Top Revenue</button>
+          <button class="sug-chip" data-q="Show quarterly breakdown for TechNova Solutions">TechNova Quarterly</button>
+        </div>
+        <div class="input-row">
+          <input type="text" id="nlQuestion" class="input-field" placeholder="Ask a question about your financial data…"
+            autocomplete="off" maxlength="500" />
+          <button class="send-btn" id="btnAsk">
+            <i data-lucide="send" style="width:14px;height:14px;"></i>
+            Ask
+          </button>
+        </div>
+      </div>
+    </div><!-- end chat-area -->
+  </main>
+
+  <!-- ═══════════════════════ SCRIPT ═══════════════════════ -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => { lucide.createIcons(); });
+
+    const $ = id => document.getElementById(id);
+
+    /* ── Constants ─────────────────────────────────────────────────── */
+    const COMPANY_NAMES = {
+      C001: "Elliot Systems", C002: "TechNova Solutions",
+      C003: "GreenField Industries", C004: "Meridian Corp", C005: "Atlas Dynamics",
+    };
+    const PLAIN_COLS = new Set(["year", "quarter", "total_companies"]);
+    const METRIC_KW = ["revenue", "cost", "profit", "avg"];
+    const isMetric = col => METRIC_KW.some(k => col.toLowerCase().includes(k));
+    let msgCounter = 0;
+
+    /* ── Role badge ────────────────────────────────────────────────── */
+    function updateBadge() {
+      const [role, , name] = $("userSelector").value.split("|");
+      const labels = {
+        admin: "Admin", manager: "Manager", finance_user: "Finance",
+        auditor: "Auditor", viewer: "Viewer",
+      };
+      $("activeBadge").textContent = `${name} · ${labels[role] || role}`;
+    }
+    $("userSelector").addEventListener("change", updateBadge);
+    updateBadge();
+
+    /* ── Headers from user selector ────────────────────────────────── */
+    function authHeaders() {
+      const [role, rawCo] = $("userSelector").value.split("|");
+      const company = rawCo === "null" ? "" : rawCo;
+      return { "Content-Type": "application/json", "X-User-Role": role, "X-User-Company": company };
+    }
+
+    /* ── Hide empty state once first message arrives ───────────────── */
+    function hideEmpty() {
+      const es = $("emptyState");
+      if (es) es.remove();
+    }
+
+    /* ── Scroll to bottom ───────────────────────────────────────────── */
+    function scrollBottom() {
+      const c = $("chatMessages");
+      c.scrollTop = c.scrollHeight;
+    }
+
+    /* ── Typing indicator ───────────────────────────────────────────── */
+    function showTyping() {
+      hideEmpty();
+      const div = document.createElement("div");
+      div.id = "typingIndicator";
+      div.className = "typing-indicator show";
+      div.innerHTML = `
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+    <span class="typing-label">Analysing&hellip;</span>`;
+      $("chatMessages").appendChild(div);
+      scrollBottom();
+    }
+    function hideTyping() {
+      const t = $("typingIndicator");
+      if (t) t.remove();
+    }
+
+    /* ── User message bubble ─────────────────────────────────────────── */
+    function appendUserMsg(question) {
+      hideEmpty();
+      const div = document.createElement("div");
+      div.className = "msg";
+      div.innerHTML = `<div class="msg-user"><div class="msg-user-bubble">${esc(question)}</div></div>`;
+      $("chatMessages").appendChild(div);
+      scrollBottom();
+    }
+
+    /* ── AI response card ────────────────────────────────────────────── */
+    function appendAICard(data, question) {
+      hideTyping();
+      const id = ++msgCounter;
+      const isAI = data.source === "groq_ai";
+      const totalSec = data.timings?.total_ms != null
+        ? `${(data.timings.total_ms / 1000).toFixed(2)}s`
+        : "";
+
+      const card = document.createElement("div");
+      card.className = "msg";
+
+      // Build header
+      const sourceBadge = isAI
+        ? `<span class="msg-ai-badge badge-ai">AI Generated</span>`
+        : `<span class="msg-ai-badge badge-predefined">Predefined</span>`;
+
+      const rowCount = data.rows_returned ?? (data.rows?.length ?? 0);
+      const tableToggle = rowCount > 0
+        ? `<button class="table-toggle-btn" id="tbl-btn-${id}" onclick="toggleTable(${id})">
+         <i data-lucide="table-2" style="width:12px;height:12px;"></i>
+         ${rowCount} row${rowCount !== 1 ? "s" : ""}
+       </button>`
+        : `<span style="font-size:11.5px;color:var(--tx-4);">0 rows</span>`;
+
+      // RBAC alert
+      let rbacHtml = "";
+      if (data.rbac_applied) {
+        const role = data.rbac_role;
+        const hidden = (data.hidden_columns || data.masked_columns || []).join(", ");
+        let cls = "msg-alert-info", icon = "shield-check", title = "", body = data.rbac_detail || "";
+        if (role === "auditor") {
+          cls = "msg-alert-warn"; icon = "eye-off";
+          title = hidden ? `Auditor — hidden: ${hidden}` : "Auditor Access";
+        } else if (role === "viewer") {
+          cls = "msg-alert-error"; icon = "lock";
+          title = hidden ? `Viewer — hidden: ${hidden}` : "Viewer Access";
+        } else if (role === "finance_user") {
+          title = `Finance User — ${COMPANY_NAMES[data.rbac_company] || data.rbac_company || "C001"} Only`;
+        }
+        if (title) {
+          rbacHtml = `<div class="msg-alert ${cls}" style="margin:10px 18px 0;">
+        <i data-lucide="${icon}" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;"></i>
+        <div><div class="msg-alert-title">${esc(title)}</div><div class="msg-alert-body">${esc(body)}</div></div>
+      </div>`;
+        }
+      }
+
+      // Table HTML
+      let tableHtml = "";
+      if (rowCount > 0 && data.columns && data.rows) {
+        const cols = data.columns;
+        const aligns = cols.map(c => isMetric(c) ? "right" : "left");
+        const thead = "<tr>" + cols.map((c, i) => {
+          let h = c.replace(/_/g, " ");
+          if (h.toLowerCase() === "company id") h = "Company";
+          return `<th class="th-${aligns[i]}">${h}</th>`;
+        }).join("") + "</tr>";
+        const tbody = data.rows.map(row =>
+          "<tr>" + row.map((cell, i) => {
+            const col = cols[i].toLowerCase();
+            if (cell === null || cell === undefined)
+              return `<td class="td-${aligns[i]} td-null">—</td>`;
+            if (col === "company_id" && typeof cell === "string")
+              return `<td class="td-${aligns[i]}">${esc(COMPANY_NAMES[cell.toUpperCase()] || cell)}</td>`;
+            if (typeof cell === "number") {
+              if (PLAIN_COLS.has(col))
+                return `<td class="td-${aligns[i]} td-plain">${cell}</td>`;
+              return `<td class="td-${aligns[i]} td-num">${cell.toLocaleString("en-US")}</td>`;
+            }
+            return `<td class="td-${aligns[i]}">${esc(String(cell))}</td>`;
+          }).join("") + "</tr>"
+        ).join("");
+
+        tableHtml = `
+      <div class="table-collapse" id="tbl-${id}">
+        <table class="tbl">
+          <thead id="th-${id}">${thead}</thead>
+          <tbody>${tbody}</tbody>
+        </table>
+      </div>`;
+      }
+
+      // Summary
+      const summaryText = data.ai_summary || "";
+      let summaryHtml = "";
+      if (summaryText) {
+        summaryHtml = `
+      <div class="msg-summary" id="sum-${id}">
+        <div class="summary-header">
+          <i data-lucide="sparkles" style="width:13px;height:13px;"></i>
+          AI Executive Summary
+        </div>
+        <div class="summary-text" id="sumtext-${id}"></div>
+      </div>`;
+      }
+
+      // Follow-ups
+      const followups = data.ai_followups || [];
+      let followupHtml = "";
+      if (followups.length > 0) {
+        const chips = followups.map(q =>
+          `<button class="followup-chip" onclick="askFollowup(${JSON.stringify(q)})">
+         <i data-lucide="corner-down-right" style="width:12px;height:12px;"></i>
+         ${esc(q)}
+       </button>`
+        ).join("");
+        followupHtml = `
+      <div class="followup-section">
+        <div class="followup-label">Can I help you with anything else?</div>
+        <div class="followup-chips">${chips}</div>
+      </div>`;
+      }
+
+      card.innerHTML = `
+    <div class="msg-ai">
+      <div class="msg-ai-header">
+        <div>
+          <div class="msg-ai-title">${esc(data.label || "Result")}</div>
+          <div class="msg-ai-meta">${totalSec ? totalSec + " · " : ""}${sourceBadge}</div>
+        </div>
+        <div class="msg-ai-badges">${tableToggle}</div>
+      </div>
+      ${rbacHtml}
+      ${tableHtml}
+      ${summaryHtml}
+      ${followupHtml}
+    </div>`;
+
+      $("chatMessages").appendChild(card);
+      lucide.createIcons();
+      scrollBottom();
+
+      // Typewriter for summary
+      if (summaryText) {
+        typewriter(summaryText, $(`sumtext-${id}`), () => scrollBottom());
+      }
+    }
+
+    /* ── Error card ──────────────────────────────────────────────────── */
+    function appendErrorCard(msg) {
+      hideTyping();
+      const div = document.createElement("div");
+      div.className = "msg";
+      div.innerHTML = `
+    <div class="msg-error">
+      <strong>Error:</strong> ${esc(msg)}
+    </div>`;
+      $("chatMessages").appendChild(div);
+      scrollBottom();
+    }
+
+    /* ── Table toggle ───────────────────────────────────────────────── */
+    function toggleTable(id) {
+      const tbl = $(`tbl-${id}`);
+      const btn = $(`tbl-btn-${id}`);
+      if (!tbl) return;
+      tbl.classList.toggle("open");
+      // scroll into view if opening
+      if (tbl.classList.contains("open")) {
+        tbl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }
+
+    /* ── Follow-up ─────────────────────────────────────────────────── */
+    function askFollowup(question) {
+      $("nlQuestion").value = question;
+      doAsk();
+    }
+
+    /* ── Typewriter ─────────────────────────────────────────────────── */
+    function typewriter(text, el, onDone) {
+      const html = marked.parse(text);
+      // Use a temporary div to get plaintext length for char-by-char is hard on HTML.
+      // Instead, render instantly but animate opacity per paragraph.
+      el.innerHTML = html;
+      el.style.opacity = "0";
+      el.style.transition = "opacity .4s ease";
+      setTimeout(() => {
+        el.style.opacity = "1";
+        if (onDone) onDone();
+      }, 80);
+    }
+
+    /* ── Fetch helper ───────────────────────────────────────────────── */
+    async function apiFetch(url, method = "GET", body = null) {
+      const opts = { method, headers: authHeaders() };
+      if (body) opts.body = JSON.stringify(body);
+      try {
+        const r = await fetch(url, opts);
+        const d = await r.json();
+        return d;
+      } catch (e) {
+        return { status: "error", message: e.message };
+      }
+    }
+
+    /* ── Main Ask ───────────────────────────────────────────────────── */
+    async function doAsk() {
+      const q = $("nlQuestion").value.trim();
+      if (!q) return;
+      $("nlQuestion").value = "";
+      $("btnAsk").disabled = true;
+
+      appendUserMsg(q);
+      showTyping();
+
+      const d = await apiFetch("/api/query-router", "POST", { question: q });
+      $("btnAsk").disabled = false;
+
+      if (d.status === "error") {
+        appendErrorCard(d.message || "An unexpected error occurred.");
+        return;
+      }
+      if (d.status === "llm_required") {
+        // LLM stub / no match
+        hideTyping();
+        const div = document.createElement("div");
+        div.className = "msg";
+        const chips = (d.suggestions || []).map(s =>
+          `<button class="followup-chip" onclick="askFollowup(${JSON.stringify(s)})">
+         <i data-lucide="corner-down-right" style="width:12px;height:12px;"></i>${esc(s)}
+       </button>`
+        ).join("");
+        div.innerHTML = `
+      <div class="msg-ai">
+        <div class="msg-ai-header">
+          <div><div class="msg-ai-title">Couldn't answer this question</div>
+          <div class="msg-ai-meta">Try one of the suggestions below</div></div>
+        </div>
+        <div style="padding:6px 0;">
+          <div class="followup-section">
+            <div class="followup-label">Can I help you with these instead?</div>
+            <div class="followup-chips">${chips}</div>
+          </div>
+        </div>
+      </div>`;
+        $("chatMessages").appendChild(div);
+        lucide.createIcons();
+        scrollBottom();
+        return;
+      }
+      appendAICard(d, q);
+    }
+
+    /* ── Sidebar nav ─────────────────────────────────────────────────── */
+    async function loadUrl(url, label) {
+      appendUserMsg(label || url);
+      showTyping();
+      const d = await apiFetch(url);
+      if (d.status === "error") { appendErrorCard(d.message || "Failed to load."); return; }
+
+      // sidebar predefined calls don't come through query-router — add summary
+      if (d.rows && d.columns && !d.ai_summary) {
+        const role = $("userSelector").value.split("|")[0];
+        const company = $("userSelector").value.split("|")[1];
+        // Generate summary inline via query-router for better UX
+        // We already have data — skip to display
+      }
+      appendAICard(d, label || url);
+    }
+
+    ["btn-yearly", "btn-quarterly", "btn-summary", "btn-profit", "btn-revenue", "btn-cost"].forEach(id => {
+      const btn = $(id);
+      if (!btn) return;
+      const questions = {
+        "btn-yearly": "Show yearly revenue for all companies",
+        "btn-quarterly": "Show quarterly revenue for all companies",
+        "btn-summary": "Show platform summary",
+        "btn-profit": "Top 10 companies by profit",
+        "btn-revenue": "Top 10 companies by revenue",
+        "btn-cost": "Top 10 companies by cost",
+      };
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        $("nlQuestion").value = questions[id];
+        doAsk();
+      });
+    });
+
+    /* ── Filters ─────────────────────────────────────────────────────── */
+    $("btn-year").addEventListener("click", () => {
+      const yr = $("yearInput").value.trim();
+      if (!yr) return;
+      if (yr < 2020 || yr > 2035) { appendErrorCard("Year must be between 2020 and 2035."); return; }
+      loadUrl(`/api/year/${yr}`, `Revenue in ${yr}`);
+    });
+    $("yearInput").addEventListener("keydown", e => { if (e.key === "Enter") $("btn-year").click(); });
+
+    $("btn-quarter").addEventListener("click", () => {
+      const q = $("quarterInput").value;
+      if (!q) { appendErrorCard("Select a quarter first."); return; }
+      loadUrl(`/api/quarter/${q}`, `Quarter Q${q} data`);
+    });
+
+    $("btn-company").addEventListener("click", () => {
+      const id = $("companyInput").value.trim().toUpperCase();
+      if (!id || !/^C\d{3,4}$/.test(id)) { appendErrorCard("Enter a valid company ID like C001."); return; }
+      loadUrl(`/api/company/${id}`, `Yearly revenue for ${COMPANY_NAMES[id] || id}`);
+    });
+    $("companyInput").addEventListener("keydown", e => { if (e.key === "Enter") $("btn-company").click(); });
+
+    $("btn-company-q").addEventListener("click", () => {
+      const id = $("companyQInput").value.trim().toUpperCase();
+      if (!id || !/^C\d{3,4}$/.test(id)) { appendErrorCard("Enter a valid company ID like C001."); return; }
+      loadUrl(`/api/company/${id}/quarterly`, `Quarterly revenue for ${COMPANY_NAMES[id] || id}`);
+    });
+    $("companyQInput").addEventListener("keydown", e => { if (e.key === "Enter") $("btn-company-q").click(); });
+
+    /* ── Input bar ───────────────────────────────────────────────────── */
+    $("btnAsk").addEventListener("click", doAsk);
+    $("nlQuestion").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) doAsk(); });
+
+    /* ── Suggestion chips ────────────────────────────────────────────── */
+    document.querySelectorAll(".sug-chip[data-q]").forEach(c => {
+      c.addEventListener("click", () => { $("nlQuestion").value = c.dataset.q; doAsk(); });
+    });
+
+    /* ── Escape HTML ─────────────────────────────────────────────────── */
+    function esc(str) {
+      if (str == null) return "";
+      return String(str)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    /* ── User change: keep chat, update badge ────────────────────────── */
+    $("userSelector").addEventListener("change", updateBadge);
+  </script>
+</body>
+
+</html>
