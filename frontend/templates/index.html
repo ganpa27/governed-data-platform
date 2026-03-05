@@ -9,7 +9,7 @@
     content="Role-aware, policy-enforced financial data platform powered by Databricks and AI." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=11" />
+  <link rel="stylesheet" href="/static/style.css?v=12" />
   <script defer src="https://unpkg.com/lucide@latest"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
@@ -319,7 +319,7 @@
       if (followups.length > 0) {
         const style = summaryText ? 'style="display:none; opacity:0; transition: opacity 0.5s ease; margin-top: 15px;"' : '';
         const chips = followups.map((q, i) =>
-          `<button class="followup-chip" style="animation-delay: ${i * 0.15}s" onclick='askFollowup(${JSON.stringify(q).replace(/'/g, "&#39;")})'>
+          `<button class="followup-chip" onclick='askFollowup(${JSON.stringify(q).replace(/'/g, "&#39;")})'>
          <i data-lucide="corner-down-right" style="width:12px;height:12px;"></i>
          ${esc(q)}
        </button>`
@@ -362,9 +362,19 @@
             setTimeout(() => {
               f.style.opacity = "1";
               scrollBottom();
+              f.querySelectorAll('.followup-chip').forEach((chip, i) => {
+                setTimeout(() => chip.classList.add('animate-in'), i * 150);
+              });
             }, 50);
           }
         });
+      } else {
+        const f = $(`followups-${id}`);
+        if (f) {
+          f.querySelectorAll('.followup-chip').forEach((chip, i) => {
+            setTimeout(() => chip.classList.add('animate-in'), i * 150);
+          });
+        }
       }
     }
 
