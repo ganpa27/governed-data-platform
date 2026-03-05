@@ -291,17 +291,28 @@ def api_query_router():
         sql = generate_sql(question, user_role=user_role, company_id=company or None)
         llm_gen_ms = int((_time.monotonic() - t_llm) * 1000)
     except ValueError as e:
+        # User asked a non-database question or something we can't query.
+        # Fall back to conversational response directly.
+        from ai_engine import answer_general_question
+        ai_resp = answer_general_question(question)
+        
         return jsonify({
-            "status"     : "llm_required",
-            "message"    : str(e),
-            "question"   : question,
-            "suggestions": [
-                "Show yearly revenue",
-                "Show quarterly revenue",
-                "Top 10 companies by profit",
-                "Revenue for C001",
-                "Quarter 1 data",
-            ],
+            "status"           : "success",
+            "label"            : "AI Assistant",
+            "columns"          : [],
+            "rows"             : [],
+            "rows_returned"    : 0,
+            "question"         : question,
+            "source"           : "groq_ai",
+            "sql"              : "",
+            "governance_status": "N/A",
+            "explanation"      : "Conversational Response",
+            "suggestion"       : "",
+            "ai_summary"       : ai_resp.get("text", ""),
+            "ai_followups"     : ai_resp.get("followups", []),
+            "timings"          : {
+                "routing_ms": 0, "llm_gen_ms": 0, "db_query_ms": 0, "governance_ms": 0
+            }
         }), 200
     except (AIError, SQLValidationError) as e:
         log.exception("AI engine error in query-router")

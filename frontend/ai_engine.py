@@ -641,7 +641,58 @@ def generate_summary(
         logger.warning("[AI] Summary generation failed: %s", exc)
         return {"text": fallback_text, "followups": fallback_followups}
 
+def answer_general_question(question: str) -> dict[str, str | list[str]]:
+    """Answers a purely conversational or general query when SQL generation isn't applicable."""
+    if not GROQ_API_KEY:
+        return {"text": "Internal error: No API key available for AI assistant.", "followups": []}
+    
+    prompt = f"""You are a helpful and professional financial AI assistant for the Elliot Systems Governed Data Platform.
+A user asked the following conversational question:
+"{question}"
 
+Please provide a helpful, concise, and professional answer. Provide exactly 3 follow-up questions they might ask next.
+
+Output exactly this separator on its own line after your answer: ---FOLLOWUPS---
+Then list exactly 3 specific follow-up questions, each on its own line, numbered: 1. ... 2. ... 3. ...
+"""
+
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=GROQ_API_KEY, base_url=GROQ_BASE_URL, timeout=15.0)
+        resp = client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {"role": "system", "content": "You are a professional financial AI assistant. Follow instructions carefully."},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=600,
+            temperature=0.3,
+        )
+        raw = (resp.choices[0].message.content or "").strip()
+        
+        if "---FOLLOWUPS---" in raw:
+            parts = raw.split("---FOLLOWUPS---", 1)
+            summary = parts[0].strip()
+            fq_block = parts[1].strip() if len(parts) > 1 else ""
+        else:
+            summary = raw
+            fq_block = ""
+            
+        followups = []
+        if fq_block:
+            import re as _re
+            for m in _re.finditer(r"\d+\.\s*(.+?)(?=\n\d+\.|$)", fq_block, _re.DOTALL):
+                q = m.group(1).strip()
+                if q:
+                    followups.append(q)
+                    
+        return {
+            "text": summary,
+            "followups": followups[:3]
+        }
+    except Exception as exc:
+        logger.warning("[AI] General question answering failed: %s", exc)
+        return {"text": "I'm sorry, I cannot process your request right now.", "followups": []}
 
 
 

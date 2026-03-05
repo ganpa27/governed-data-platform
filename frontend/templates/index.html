@@ -58,38 +58,7 @@
         </button>
       </div>
 
-      <!-- Filters -->
-      <div class="nav-group">
-        <span class="nav-heading">Filter by Period</span>
-        <div class="filter-field">
-          <input type="number" id="yearInput" class="filter-input" placeholder="Year e.g. 2024" min="2020" max="2035" />
-          <button class="filter-go" id="btn-year">Go</button>
-        </div>
-        <div class="filter-field">
-          <select id="quarterInput" class="filter-input">
-            <option value="">Quarter...</option>
-            <option value="1">Q1 — Jan–Mar</option>
-            <option value="2">Q2 — Apr–Jun</option>
-            <option value="3">Q3 — Jul–Sep</option>
-            <option value="4">Q4 — Oct–Dec</option>
-          </select>
-          <button class="filter-go" id="btn-quarter">Go</button>
-        </div>
-      </div>
-
-      <!-- Company -->
-      <div class="nav-group">
-        <span class="nav-heading">Company</span>
-        <div class="filter-field">
-          <input type="text" id="companyInput" class="filter-input" placeholder="ID e.g. C001" maxlength="6" />
-          <button class="filter-go" id="btn-company">Year</button>
-        </div>
-        <div class="filter-field">
-          <input type="text" id="companyQInput" class="filter-input" placeholder="ID e.g. C001" maxlength="6" />
-          <button class="filter-go" id="btn-company-q">Qtr</button>
-        </div>
-      </div>
-    </nav>
+      </nav>
 
     <!-- User Selector -->
     <div class="user-selector-wrap">
@@ -347,6 +316,7 @@
       const followups = data.ai_followups || [];
       let followupHtml = "";
       if (followups.length > 0) {
+        const style = summaryText ? 'style="display:none; opacity:0; transition: opacity 0.5s ease; margin-top: 15px;"' : '';
         const chips = followups.map(q =>
           `<button class="followup-chip" onclick="askFollowup(${JSON.stringify(q)})">
          <i data-lucide="corner-down-right" style="width:12px;height:12px;"></i>
@@ -354,7 +324,7 @@
        </button>`
         ).join("");
         followupHtml = `
-      <div class="followup-section">
+      <div class="followup-section" id="followups-${id}" ${style}>
         <div class="followup-label">Can I help you with anything else?</div>
         <div class="followup-chips">${chips}</div>
       </div>`;
@@ -381,7 +351,18 @@
 
       // Typewriter for summary
       if (summaryText) {
-        typewriter(summaryText, $(`sumtext-${id}`), () => scrollBottom());
+        typewriter(summaryText, $(`sumtext-${id}`), () => {
+          scrollBottom();
+          const f = $(`followups-${id}`);
+          if (f) {
+            f.style.display = "block";
+            // Wait slightly so transition applies
+            setTimeout(() => {
+              f.style.opacity = "1";
+              scrollBottom();
+            }, 50);
+          }
+        });
       }
     }
 
@@ -563,35 +544,6 @@
         doAsk();
       });
     });
-
-    /* ── Filters ─────────────────────────────────────────────────────── */
-    $("btn-year").addEventListener("click", () => {
-      const yr = $("yearInput").value.trim();
-      if (!yr) return;
-      if (yr < 2020 || yr > 2035) { appendErrorCard("Year must be between 2020 and 2035."); return; }
-      loadUrl(`/api/year/${yr}`, `Revenue in ${yr}`);
-    });
-    $("yearInput").addEventListener("keydown", e => { if (e.key === "Enter") $("btn-year").click(); });
-
-    $("btn-quarter").addEventListener("click", () => {
-      const q = $("quarterInput").value;
-      if (!q) { appendErrorCard("Select a quarter first."); return; }
-      loadUrl(`/api/quarter/${q}`, `Quarter Q${q} data`);
-    });
-
-    $("btn-company").addEventListener("click", () => {
-      const id = $("companyInput").value.trim().toUpperCase();
-      if (!id || !/^C\d{3,4}$/.test(id)) { appendErrorCard("Enter a valid company ID like C001."); return; }
-      loadUrl(`/api/company/${id}`, `Yearly revenue for ${COMPANY_NAMES[id] || id}`);
-    });
-    $("companyInput").addEventListener("keydown", e => { if (e.key === "Enter") $("btn-company").click(); });
-
-    $("btn-company-q").addEventListener("click", () => {
-      const id = $("companyQInput").value.trim().toUpperCase();
-      if (!id || !/^C\d{3,4}$/.test(id)) { appendErrorCard("Enter a valid company ID like C001."); return; }
-      loadUrl(`/api/company/${id}/quarterly`, `Quarterly revenue for ${COMPANY_NAMES[id] || id}`);
-    });
-    $("companyQInput").addEventListener("keydown", e => { if (e.key === "Enter") $("btn-company-q").click(); });
 
     /* ── Input bar ───────────────────────────────────────────────────── */
     $("btnAsk").addEventListener("click", doAsk);

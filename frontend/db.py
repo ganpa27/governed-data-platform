@@ -7,7 +7,7 @@ import certifi
 from databricks import sql
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 def get_connection():
