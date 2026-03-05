@@ -362,9 +362,20 @@
             setTimeout(() => {
               f.style.opacity = "1";
               scrollBottom();
+              // Cascade animation for chips
+              f.querySelectorAll('.followup-chip').forEach((chip, i) => {
+                setTimeout(() => chip.classList.add('animate-in'), i * 150);
+              });
             }, 50);
           }
         });
+      } else {
+        const f = $(`followups-${id}`);
+        if (f) {
+          f.querySelectorAll('.followup-chip').forEach((chip, i) => {
+            setTimeout(() => chip.classList.add('animate-in'), i * 150);
+          });
+        }
       }
     }
 
@@ -509,6 +520,12 @@
         $("chatMessages").appendChild(div);
         lucide.createIcons();
         scrollBottom();
+
+        // Staggered animation
+        div.querySelectorAll('.followup-chip').forEach((chip, i) => {
+          setTimeout(() => chip.classList.add('animate-in'), i * 150);
+        });
+
         return;
       }
       appendAICard(d, q);
