@@ -1,0 +1,58 @@
+services:
+  # ── Flask Frontend (Chat UI + AI Summary) ──────────────────────────────────
+  - type: web
+    name: governed-data-platform-ui
+    runtime: python
+    rootDir: frontend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    plan: free
+    envVars:
+      - key: DATABRICKS_SERVER_HOSTNAME
+        sync: false
+      - key: DATABRICKS_HTTP_PATH
+        sync: false
+      - key: DATABRICKS_TOKEN
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: GROQ_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: AI_MAX_TOKENS
+        value: "500"
+      - key: AI_TEMPERATURE
+        value: "0.1"
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+
+  # ── FastAPI Backend (Data API + AI Orchestration) ──────────────────────────
+  - type: web
+    name: governed-data-platform-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 2
+    plan: free
+    envVars:
+      - key: DATABRICKS_SERVER_HOSTNAME
+        sync: false
+      - key: DATABRICKS_HTTP_PATH
+        sync: false
+      - key: DATABRICKS_TOKEN
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: GROQ_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: LLM_PROVIDER
+        value: groq
+      - key: AI_MAX_TOKENS
+        value: "500"
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: ENV
+        value: production
