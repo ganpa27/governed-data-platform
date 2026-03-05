@@ -58,7 +58,7 @@
         </button>
       </div>
 
-      </nav>
+    </nav>
 
     <!-- User Selector -->
     <div class="user-selector-wrap">
@@ -154,6 +154,7 @@
     const METRIC_KW = ["revenue", "cost", "profit", "avg"];
     const isMetric = col => METRIC_KW.some(k => col.toLowerCase().includes(k));
     let msgCounter = 0;
+    let lastContext = "";
 
     /* ── Role badge ────────────────────────────────────────────────── */
     function updateBadge() {
@@ -351,6 +352,7 @@
 
       // Typewriter for summary
       if (summaryText) {
+        lastContext = summaryText;
         typewriter(summaryText, $(`sumtext-${id}`), () => {
           scrollBottom();
           const f = $(`followups-${id}`);
@@ -471,7 +473,10 @@
       appendUserMsg(q);
       showTyping();
 
-      const d = await apiFetch("/api/query-router", "POST", { question: q });
+      const payload = { question: q };
+      if (lastContext) payload.context = lastContext;
+
+      const d = await apiFetch("/api/query-router", "POST", payload);
       $("btnAsk").disabled = false;
 
       if (d.status === "error") {

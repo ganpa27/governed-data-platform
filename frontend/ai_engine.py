@@ -641,16 +641,18 @@ def generate_summary(
         logger.warning("[AI] Summary generation failed: %s", exc)
         return {"text": fallback_text, "followups": fallback_followups}
 
-def answer_general_question(question: str) -> dict[str, str | list[str]]:
+def answer_general_question(question: str, context: str = "") -> dict[str, str | list[str]]:
     """Answers a purely conversational or general query when SQL generation isn't applicable."""
     if not GROQ_API_KEY:
         return {"text": "Internal error: No API key available for AI assistant.", "followups": []}
     
+    context_block = f"\nHere is the recent context/data for reference:\n{context}\n" if context else ""
     prompt = f"""You are a helpful and professional financial AI assistant for the Elliot Systems Governed Data Platform.
+{context_block}
 A user asked the following conversational question:
 "{question}"
 
-Please provide a helpful, concise, and professional answer. Provide exactly 3 follow-up questions they might ask next.
+Please provide a helpful, concise, and professional answer based on the context provided (if any). Provide exactly 3 follow-up questions they might ask next.
 
 Output exactly this separator on its own line after your answer: ---FOLLOWUPS---
 Then list exactly 3 specific follow-up questions, each on its own line, numbered: 1. ... 2. ... 3. ...

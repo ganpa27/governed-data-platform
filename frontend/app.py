@@ -227,6 +227,7 @@ def api_query_router():
 
     body      = request.get_json(silent=True) or {}
     question  = (body.get("question") or "").strip()
+    context   = (body.get("context") or "").strip()
     user_role = _get_role()
     company   = _get_company()
 
@@ -294,7 +295,7 @@ def api_query_router():
         # User asked a non-database question or something we can't query.
         # Fall back to conversational response directly.
         from ai_engine import answer_general_question
-        ai_resp = answer_general_question(question)
+        ai_resp = answer_general_question(question, context)
         
         return jsonify({
             "status"           : "success",
