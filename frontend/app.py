@@ -20,6 +20,9 @@ Role is read from X-User-Role header.
 Company is read from X-User-Company header (for finance_user).
 """
 import time as _time
+import logging
+import traceback
+import os
 
 from flask import Flask, request, jsonify, render_template
 from db import run_query
@@ -31,7 +34,22 @@ from ai_engine import (
 from llm_stub import llm_stub
 from rbac import enforce_rbac
 
+# Configure logging — this ensures errors show in Render logs
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+)
+log = logging.getLogger(__name__)
+
 app = Flask(__name__)
+
+# ── Startup diagnostic ────────────────────────────────────────────────────────
+log.info("=== App starting — checking env vars ===")
+log.info(f"DATABRICKS_SERVER_HOSTNAME = {os.getenv('DATABRICKS_SERVER_HOSTNAME', 'NOT SET')}")
+log.info(f"DATABRICKS_HTTP_PATH       = {os.getenv('DATABRICKS_HTTP_PATH', 'NOT SET')}")
+log.info(f"DATABRICKS_TOKEN           = {'SET (' + os.getenv('DATABRICKS_TOKEN','')[:8] + '...)' if os.getenv('DATABRICKS_TOKEN') else 'NOT SET'}")
+log.info(f"GROQ_API_KEY               = {'SET' if os.getenv('GROQ_API_KEY') else 'NOT SET'}")
+log.info(f"GROQ_MODEL                 = {os.getenv('GROQ_MODEL', 'NOT SET')}")
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -96,6 +114,7 @@ def api_yearly():
     try:
         return jsonify(_respond("yearly"))
     except Exception as e:
+        log.exception("api_yearly failed")
         return _error(str(e), 500)
 
 
@@ -285,8 +304,10 @@ def api_query_router():
             ],
         }), 200
     except (AIError, SQLValidationError) as e:
+        log.exception("AI engine error in query-router")
         return _error(f"AI engine error: {e}", 503)
     except Exception as e:
+        log.exception("Unexpected AI error in query-router")
         return _error(f"Unexpected AI error: {e}", 500)
 
     # ── Step 3: execute the validated AI-generated SQL ────────────────────────
@@ -353,6 +374,7 @@ def api_query_router():
             "filtered_reason" : rbac["filtered_reason"],
         })
     except Exception as e:
+        log.exception("Query execution failed in query-router")
         return _error(f"Query execution failed: {e}", 500)
 
 
