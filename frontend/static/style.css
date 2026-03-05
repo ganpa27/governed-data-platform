@@ -51,7 +51,8 @@ body {
   font-family: 'Inter', system-ui, sans-serif;
   background: var(--bg);
   color: var(--tx-2);
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   display: flex;
   -webkit-font-smoothing: antialiased;
   font-size: 14px;
@@ -208,8 +209,9 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
   max-width: calc(100vw - var(--sidebar-w));
+  overflow: hidden;
 }
 
 /* topbar */
@@ -220,6 +222,10 @@ body {
   padding: 16px 28px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  flex-shrink: 0;
 }
 
 .topbar-left {
@@ -274,6 +280,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-height: 0;
 }
 
 .chat-messages {
@@ -283,6 +290,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  min-height: 0;
 }
 
 /* Empty state */
@@ -675,6 +683,7 @@ body {
   padding: 14px 28px 18px;
   background: var(--surface);
   border-top: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 /* suggestion chips above input */
