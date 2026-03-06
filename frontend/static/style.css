@@ -75,8 +75,11 @@ body {
 }
 
 .brand {
-  padding: 18px 16px 14px;
+  padding: 20px 16px;
   border-bottom: 1px solid var(--border-lt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav {
@@ -85,6 +88,13 @@ body {
   display: flex;
   flex-direction: column;
   gap: 22px;
+  border-top: 1px solid var(--border-lt);
+}
+
+.nav-divider {
+  border: none;
+  border-top: 1px solid var(--border-lt);
+  margin: 4px 8px;
 }
 
 .nav-group {
@@ -139,8 +149,8 @@ body {
 
 /* user selector in sidebar */
 .user-selector-wrap {
-  padding: 10px;
-  border-top: 1px solid var(--border-lt);
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--border-lt);
 }
 
 .user-label {
