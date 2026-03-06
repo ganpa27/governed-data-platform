@@ -9,7 +9,7 @@
     content="Role-aware, policy-enforced financial data platform powered by Databricks and AI." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=15" />
+  <link rel="stylesheet" href="/static/style.css?v=13" />
   <script defer src="https://unpkg.com/lucide@latest"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
@@ -19,7 +19,7 @@
   <!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
   <aside class="sidebar">
     <div class="brand">
-      <svg viewBox="0 0 160 40" width="150" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 160 40" width="130" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
           d="M 26 6 H 6 C 3.5 6 2 7.5 2 10 V 30 C 2 32.5 3.5 34 6 34 H 26 V 26 H 13 C 11.5 26 11 25.5 11 24 V 16 C 11 14.5 11.5 14 13 14 H 26 V 6 Z"
           fill="#111827" />
@@ -27,19 +27,6 @@
         <text x="31" y="34" font-family="'Inter',sans-serif" font-weight="900" font-size="37" fill="#111827"
           letter-spacing="0.5">LLIOT</text>
       </svg>
-    </div>
-
-    <!-- User Selector (above Reports) -->
-    <div class="user-selector-wrap">
-      <div class="user-label">Active User</div>
-      <select id="userSelector" class="user-select">
-        <option value="admin|null|Ganesh">Ganesh — Admin</option>
-        <option value="manager|null|Priya">Priya — Manager</option>
-        <option value="finance_user|C001|Rahul">Rahul — Finance · Elliot Systems</option>
-        <option value="finance_user|C002|Anita">Anita — Finance · TechNova Solutions</option>
-        <option value="auditor|null|Vikram">Vikram — Auditor</option>
-        <option value="viewer|null|Sara">Sara — Viewer</option>
-      </select>
     </div>
 
     <nav class="nav">
@@ -57,8 +44,6 @@
         </button>
       </div>
 
-      <hr class="nav-divider" />
-
       <!-- Rankings -->
       <div class="nav-group">
         <span class="nav-heading">Rankings</span>
@@ -72,7 +57,29 @@
           <i data-lucide="trending-down" class="nav-icon"></i>Top 10 by Cost
         </button>
       </div>
+
     </nav>
+
+    <!-- User Selector -->
+    <div class="user-selector-wrap">
+      <div class="user-label">Active User</div>
+      <select id="userSelector" class="user-select">
+        <option value="admin|null|Ganesh">Ganesh — Admin</option>
+        <option value="manager|null|Priya">Priya — Manager</option>
+        <option value="finance_user|C001|Rahul">Rahul — Finance (C001)</option>
+        <option value="finance_user|C002|Anita">Anita — Finance (C002)</option>
+        <option value="auditor|null|Vikram">Vikram — Auditor</option>
+        <option value="viewer|null|Sara">Sara — Viewer</option>
+      </select>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="status-row">
+        <span class="status-dot"></span>
+        <span class="status-label">Databricks Connected</span>
+      </div>
+      <span class="footer-sub">Secure Views · Audit Logged</span>
+    </div>
   </aside>
 
   <!-- ═══════════════════════ MAIN ═══════════════════════ -->
@@ -86,6 +93,7 @@
       </div>
       <div class="topbar-right" id="topbarBadges">
         <span id="activeBadge" class="badge badge-role"></span>
+        <span class="badge badge-slate">Stage 4</span>
       </div>
     </header>
 
