@@ -26,6 +26,8 @@ services:
         value: "0.1"
       - key: PYTHON_VERSION
         value: "3.11.0"
+      - key: PYTHONUNBUFFERED
+        value: "1"
 
   # ── FastAPI Backend (Data API + AI Orchestration) ──────────────────────────
   - type: web
@@ -52,7 +54,11 @@ services:
         value: groq
       - key: AI_MAX_TOKENS
         value: "500"
+      - key: AI_TEMPERATURE
+        value: "0.1"
       - key: PYTHON_VERSION
         value: "3.11.0"
+      - key: PYTHONUNBUFFERED
+        value: "1"
       - key: ENV
         value: production
