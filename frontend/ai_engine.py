@@ -572,16 +572,26 @@ def generate_summary(
         f"Data returned ({len(rows)} rows):\n{data_block}\n"
         f"{security_note}\n"
         "Instructions:\n"
-        "1. Write a detailed, accurate financial analysis summary using markdown (bold, bullets).\n"
-        "2. Calculate totals, growth rates, and % changes ACCURATELY from the exact numbers.\n"
-        "3. Do NOT repeat the table row-by-row — highlight key insights only.\n"
-        "4. IMPORTANT: NEVER use internal company codes like C001, C002, C003, C004, C005.\n"
-        "   Always use the full company name (e.g. 'Elliot Systems', 'TechNova Solutions').\n"
-        "5. NEVER expose internal system identifiers, role codes, or technical keys in the summary.\n"
-        "6. After the summary, output exactly this separator on its own line: ---FOLLOWUPS---\n"
-        "7. Then list exactly 3 specific follow-up questions a business analyst would ask next.\n"
-        "   Each question on its own line, numbered: 1. ... 2. ... 3. ...\n"
-        "   Follow-up questions must also use company NAMES, never codes like C001.\n"
+        "1. Write a COMPREHENSIVE, deeply analytical financial summary directly answering the question asked.\n"
+        "2. Structure your response with clear markdown sections using **bold headers**, bullet points, and emphasis.\n"
+        "3. MANDATORY calculations — always include where data allows:\n"
+        "   - Exact totals and subtotals\n"
+        "   - Year-over-year growth rates as percentages (e.g. +38.9% revenue growth)\n"
+        "   - Profit margin = (profit / revenue × 100), calculated per row and overall\n"
+        "   - Cost-to-revenue ratio\n"
+        "   - Rankings or comparisons between companies/periods if multiple exist\n"
+        "   - Absolute change ($) and relative change (%) between periods\n"
+        "4. Include a KEY INSIGHTS section with 3-4 specific, data-driven business observations.\n"
+        "5. If multiple companies or years are present, explicitly COMPARE them with numbers.\n"
+        "6. If only one record, go deep on ratios, efficiency, and what the numbers mean for the business.\n"
+        "7. NEVER use internal codes like C001, C002 — always use full company names.\n"
+        "8. NEVER repeat raw table data row-by-row — synthesize and interpret instead.\n"
+        "9. Be specific and quantitative — vague phrases like 'significant growth' are NOT acceptable.\n"
+        "   Always back every claim with actual numbers from the data.\n"
+        "10. After the summary, output exactly this separator on its own line: ---FOLLOWUPS---\n"
+        "11. Then list exactly 3 highly specific, context-aware follow-up questions a business analyst would ask.\n"
+        "    Each question on its own line, numbered: 1. ... 2. ... 3. ...\n"
+        "    Questions must reference actual company names and specific metrics from the data.\n"
     )
 
     if not GROQ_API_KEY:
@@ -596,16 +606,19 @@ def generate_summary(
                 {
                     "role": "system",
                     "content": (
-                        "You are a precise financial data analyst for an enterprise data platform. "
-                        "You always follow the output format instructions exactly. "
-                        "Use accurate arithmetic — never estimate. "
-                        "Output the summary in markdown, then the separator ---FOLLOWUPS---, "
-                        "then exactly 3 numbered follow-up questions. Nothing else."
+                        "You are a senior financial data analyst at an enterprise analytics platform. "
+                        "Your summaries are detailed, quantitative, and highly informative — like a professional CFO report. "
+                        "You ALWAYS: calculate exact percentages, growth rates, profit margins, and ratios from the data. "
+                        "You NEVER use vague language — every observation is backed by specific numbers. "
+                        "You structure responses with clear markdown sections. "
+                        "You answer the user's EXACT question directly and completely. "
+                        "After your analysis, output '---FOLLOWUPS---' then exactly 3 numbered follow-up questions "
+                        "that are specific to the data and company names shown. Nothing else after the questions."
                     ),
                 },
                 {"role": "user", "content": summary_prompt},
             ],
-            max_tokens=1000,
+            max_tokens=1500,
             temperature=0.1,
         )
         raw = (resp.choices[0].message.content or "").strip()
